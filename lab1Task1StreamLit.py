@@ -81,9 +81,9 @@ def create_network_graph(battles_df_cleaned):
         node['value'] = N
         node['color'] = nodeColors[node['value']]
     
-    net5kings.save_graph('Jehads_lab1Task1_net5kings.html')
+    net5kings.save_graph('Jehads_lab1Task1_net5kings_streamlit.html')
     st.header("Network Visualization")
-    HtmlFile = open(f'Jehads_lab1Task1_net5kings.html', 'r', encoding='utf-8')
+    HtmlFile = open(f'Jehads_lab1Task1_net5kings_streamlit.html', 'r', encoding='utf-8')
     # Load HTML file in HTML component for display on Streamlit page
     components.html(HtmlFile.read(), height = 1200,width=1000)
 def main():
