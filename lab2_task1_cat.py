@@ -23,10 +23,6 @@ e1.add_thing(dog)
 e1.add_thing(cat)
 e1.correct_placments()
 
-#could it be something like the cat eat/drinks something and then
-#it doesn't get removed or its locked into eating the same thing over
-#and over giving it infinite performance and never dying
-
 print("Initial State of the Environment: {}.".format(e1.status))
 while not e1.is_done():
     print()
