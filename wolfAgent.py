@@ -12,11 +12,9 @@ class wolfProblemSolvingAgentClass(SimpleProblemSolvingAgentProgram):
         return percept
 
     def formulate_goal(self, state):
-      if self.goal is not None:
-        return self.goal
-      else:
-         print("No goal! can't work!")
-         return None
+      # The goal is defined in the WolfProblem class
+      # We can return None here since the problem already has the goal
+      return None
     
     def formulate_problem(self, state, goal):
        problem = WolfProblem()
