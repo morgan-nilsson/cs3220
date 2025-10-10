@@ -1,5 +1,6 @@
 from src.problemSolvingAgentProgramClass import SimpleProblemSolvingAgentProgram
-from wolfProblem import WolfProblem, Actions, Character
+from src.PS_agentPrograms import BestFirstSearchAgentProgram
+from wolfProblem import WolfProblem
  
 class wolfProblemSolvingAgentClass(SimpleProblemSolvingAgentProgram):
     def __init__(self, initial_state=None, dataGraph=None, goal=None):
@@ -20,3 +21,10 @@ class wolfProblemSolvingAgentClass(SimpleProblemSolvingAgentProgram):
     def formulate_problem(self, state, goal):
        problem = WolfProblem()
        return problem
+    
+    def search(self, problem):
+        search_program = BestFirstSearchAgentProgram()
+        result = search_program(problem)
+        if result:
+            return result.solution()
+        return None

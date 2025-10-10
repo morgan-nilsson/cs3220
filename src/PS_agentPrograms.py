@@ -20,7 +20,7 @@ def BestFirstSearchAgentProgram(f=None):
       frontier = PriorityQueue()
       frontier.put((1,node))
       #node.color=nodeColors["frontier"]
-      reached = {problem.initial:node}
+      reached = {tuple(problem.initial):node}
 
       while frontier:
         node = frontier.get()[1]
@@ -33,10 +33,10 @@ def BestFirstSearchAgentProgram(f=None):
 
         #reached.add(node.state)
         for child in node.expand(problem):
-            if child.state not in reached or child.path_cost<reached[child.state].path_cost:
+            if tuple(child.state) not in reached or child.path_cost<reached[tuple(child.state)].path_cost:
                 frontier.put((1,child))
                 #child.color=nodeColors["frontier"]
-                reached.update({child.state:child})
+                reached.update({tuple(child.state):child})
             
         #node.color=nodeColors["expanded"]
       return None
@@ -79,7 +79,7 @@ def BestFirstSearchAgentProgramForShow(f=None):
 
 
 
-      reached = {problem.initial:node}
+      reached = {tuple(problem.initial):node}
 
       while frontier:
         node = frontier.get()[1]
@@ -97,13 +97,13 @@ def BestFirstSearchAgentProgramForShow(f=None):
 
         #reached.add(node.state)
         for child in node.expand(problem):
-            if child.state not in reached or child.path_cost<reached[child.state].path_cost:
+            if tuple(child.state) not in reached or child.path_cost<reached[tuple(child.state)].path_cost:
                 frontier.put((1,child))
                 nodeColors[child.state] = "orange"
                 steps += 1
                 allNodeColors.append(dict(nodeColors))
 
-                reached.update({child.state:child})
+                reached.update({tuple(child.state):child})
 
         # modify the color of explored nodes to blue
         nodeColors[node.state] = "blue"
