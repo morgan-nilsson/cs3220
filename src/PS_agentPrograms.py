@@ -35,7 +35,6 @@ def BestFirstSearchAgentProgram(f=None):
         for child in node.expand(problem):
             if child.state not in reached or child.path_cost<reached[child.state].path_cost:
                 frontier.put((1,child))
-                #child.color=nodeColors["frontier"]
                 reached.update({child.state:child})
             
         #node.color=nodeColors["expanded"]
