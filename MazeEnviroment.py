@@ -58,19 +58,19 @@ class MazeEnviroment():
 
     def execute_action(self, agent, action, state):
         my_node = self.data[state]
-        for direction, next_node in my_node:
+        for direction, next_node, next_facing in my_node:
             if action == Actions.Advance and direction == self.facing:
                 self.current_state = next_node
                 break
 
             elif action == Actions.Left and direction == self.directions[(self.directions.index(self.facing) - 1 + 4) % 4]:
                 self.current_state = next_node
-                self.facing = self.directions[(self.directions.index(self.facing) - 1 + 4) % 4]
+                self.facing = next_facing
                 break
 
             elif action == Actions.Right and direction == self.directions[(self.directions.index(self.facing) + 1 + 4) % 4]:
                 self.current_state = next_node
-                self.facing = self.directions[(self.directions.index(self.facing) + 1 + 4) % 4]
+                self.facing = next_facing
                 break
 
         # if in a dead end, turn around
@@ -79,7 +79,7 @@ class MazeEnviroment():
             self.facing = self.directions[(self.directions.index(self.facing) + 2 + 4) % 4]
 
         # check if we are on a treasure node
-        if self.current_state in self.treasure_nodes.values():
+        if self.current_state in self.treasure_nodes.values() and self.captured_treasure == False:
             self.captured_treasure = True
             self.goal = "end"
             print("Agent has captured the treasure!")
@@ -101,7 +101,7 @@ class MazeEnviroment():
         graph_data = {}
         for node, edges in self.data.items():
             graph_data[node] = {}
-            for direction, destinaton in edges:
+            for direction, destinaton, _ in edges:
                 graph_data[node][destinaton] = ""
             
 
