@@ -1,5 +1,4 @@
 from src.graphClass import Graph
-from pyvis.network import Network
 
 class wolfGraph(Graph):
     def __init__(self, graph_dict=None, locations=None):
@@ -34,35 +33,3 @@ class wolfGraph(Graph):
         s2 = set([k for v in self.graph_dict.values() for k in v.keys()])
         nodes = s1.union(s2)
         return list(nodes)
-
-    def visualize(self):
-        """Create and display the graph visualization"""
-        net = Network(
-            heading="Wolf Graph State Space",
-            bgcolor="#222222",
-            font_color="white",
-            height="600px",
-            width="100%",
-            directed=True
-        )
-        
-        # Collect all unique nodes from both sources and targets
-        list_of_nodes = self.nodes()
-        all_nodes = set(list_of_nodes)
-        # Add all nodes to PyVis
-        for node in all_nodes:
-            if node == "LLLL":
-                color = "blue"  # Start
-            elif node == "RRRR":
-                color = "green"  # Goal
-            else:
-                color = "white"  # Regular state
-            
-            net.add_node(node, color=color, label=node)
-        
-        # Add edges directly to PyVis
-        for source, targets in self.graph_dict.items():
-            for target in targets.keys():
-                net.add_edge(source, target)
-        
-        net.show("WolfGraphStateSpace.html", notebook=False)

@@ -1,5 +1,6 @@
 from wolfProblem import WolfProblem, Locations
 import random
+
 def is_valid_state(wolf_car, sheep_car, cabbage_car):
     """
     Check if a state is valid by enforcing the boat capacity constraint.
@@ -66,7 +67,6 @@ def wolfStatesLocations(valid_list):
     keyList = []
     for i in range(len(valid_list)):
         keyList.append(encode_state(valid_list[i]))
-    print(keyList)
     x = []
     y = []
     n=len(keyList)

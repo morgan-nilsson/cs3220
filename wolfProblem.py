@@ -139,7 +139,21 @@ class WolfProblem(Problem):
         return state == self.goal
     
     def path_cost(self, c, state1, action, state2):
+        # Cost: 1 for action (1), 2 for action (4), 3 for actions (2,3)
+        action_costs = {
+            Actions.BOAT_LEFT: 1,      # Action 1 - cost 1
+            Actions.BOAT_RIGHT: 1,     # Action 1 - cost 1
+            Actions.LOAD_WOLF: 3,      # Action 2 - cost 3
+            Actions.UNLOAD_WOLF: 3,    # Action 2 - cost 3
+            Actions.LOAD_SHEEP: 3,     # Action 3 - cost 3
+            Actions.UNLOAD_SHEEP: 3,   # Action 3 - cost 3
+            Actions.LOAD_CABBAGE: 2,   # Action 4 - cost 2
+            Actions.UNLOAD_CABBAGE: 2  # Action 4 - cost 2
+        }
+        
+        # Get the cost for this specific action
+        action_cost = action_costs.get(action) 
         if c == None:
             return 1
         else:
-            return c + 1
+            return c + action_cost
