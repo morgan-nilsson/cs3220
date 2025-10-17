@@ -3,7 +3,7 @@ from src.problemClass import Problem
 from SatelliteAgent import SatelliteAgent
 from asteroidMazeProblem import AsteroidMazeProblem
 from src.nodeClass import Node
-from typing import Literal, cast
+from typing import Literal
 
 class SatelliteAgentIterativeDeepeningSearch(SatelliteAgent):
     def __init__(self, problem, initial_performance: float):
@@ -18,12 +18,11 @@ class SatelliteAgentIterativeDeepeningSearch(SatelliteAgent):
             result = self.depth_limited_search(self.problem, depth)
             if result == "fail":
                 print("No solution found.")
+                self.status = "Stuck"
                 return []
             if result != 'cutoff':
-                print(result)
                 return result
             depth += 1
-            print(f"Increasing depth to {depth}")
 
     def depth_limited_search(self, problem: AsteroidMazeProblem, limit: int):
 
@@ -34,7 +33,6 @@ class SatelliteAgentIterativeDeepeningSearch(SatelliteAgent):
             visited.add(node.state)
 
             if problem.goal_test(node.state) == True:
-                print(f"Goal test passed at state {node.state} at depth {node.depth}")
                 return node.solution()
 
             elif limit == 0:

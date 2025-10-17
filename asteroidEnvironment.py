@@ -31,6 +31,9 @@ class MatrixMaze:
     def set(self, x: int, y: int, value: int):
         self.maze[y][x] = value
 
+    def N(self) -> int:
+        return self.n * self.n
+
     def __repr__(self):
         return str(matrix(self.maze))
     
@@ -110,7 +113,7 @@ class AsteroidEnvironment(Environment):
             return {}
         if self.maze is None:
             return {}
-        x,y  = state
+        x, y  = state
         n = len(self.maze)
         good: list[AstroidMazeAction] = []
         for action in all_from_state:
@@ -158,16 +161,13 @@ class AsteroidEnvironment(Environment):
 
         return (x, y)
 
-    def percept(self, agent):
-        # not used
-        raise NotImplementedError
-    
     def execute_action(self, agent: SatelliteAgent, action: AstroidMazeAction | None) -> None:
         if agent.status != "Alive":
             print("Agent {} could not move because it {}.".format(agent, agent.status))
             return
 
-        if action not in self.possible_actions_from_state(agent.state).get(agent.state, []):
+        possible_actions = self.possible_actions_from_state(agent.state).get(agent.state, [])
+        if action not in possible_actions:
             raise ValueError(f"Action {action} is not valid from state {agent.state}")
 
         agent.state = self.move(agent, action)
@@ -199,6 +199,9 @@ class AsteroidEnvironment(Environment):
                 return (x, y)
     
     def is_done(self) -> bool:
+        for agent in self.agents:
+            if agent.problem.goal_test(agent.state):
+                agent.status = "Finished"
         return not any(agent.status == "Alive" for agent in self.agents)
 
     def step(self) -> None:
@@ -206,15 +209,16 @@ class AsteroidEnvironment(Environment):
         for agent in self.agents:
             if agent.status == "Alive":
                 action = agent.pick_action()
-                print("Agent: {} has decided to do action: {}".format(agent, action))
+                if action is None:
+                    continue
                 actions.append(action)
             else:
                 actions.append("")
             
-            for agent, action in zip(self.agents, actions):
-                if agent.status != "Alive":
-                    continue
-                self.execute_action(agent, action)
+        for agent, action in zip(self.agents, actions):
+            if agent.status != "Alive":
+                continue
+            self.execute_action(agent, action)
          
     def run(self, steps=10) -> None:
         super().run(steps)

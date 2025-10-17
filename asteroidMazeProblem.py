@@ -27,5 +27,12 @@ class AsteroidMazeProblem(Problem):
     def goal_test(self, state: tuple[int, int]) -> bool:
         return state == self.environment.goal_location
 
-    def path_cost(self, c, state1, action, state2):
-        return super().path_cost(c, state1, action, state2)
+    def path_cost(self, c, state1, action: AstroidMazeAction, state2):
+        if action in [AstroidMazeAction.LEFT.value, AstroidMazeAction.RIGHT.value]:
+            return c + 2
+        elif action == AstroidMazeAction.UP.value:
+            return c + 4
+        elif action == AstroidMazeAction.DOWN.value:
+            return c + 1
+        else:
+            raise ValueError(f"Action {action} is not recognized")
