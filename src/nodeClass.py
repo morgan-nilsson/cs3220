@@ -65,3 +65,6 @@ class Node:
 
     def __eq__(self, other):
         return isinstance(other, Node) and self.state == other.state
+
+    def __hash__(self):
+        return hash(self.state)

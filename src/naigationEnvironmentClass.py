@@ -32,7 +32,9 @@ class MazeNavigationEnvironment(Environment):
         """Change agent's location -> agent's state;
         Track performance.
         -1 for each move."""
+        
         agent.state=agent.update_state(agent.state, action)
+
         agent.performance -= 1
         print(f"Agent in {agent.state} with performance = {agent.performance}")
         self.update_agent_alive(agent)
@@ -60,7 +62,7 @@ class MazeNavigationEnvironment(Environment):
         actions = []
         for agent in self.agents:
           if agent.alive:
-            #with agent.state because for PS Agent we don't need to percive
+            #with agent.state because for PS Agent we don't need to perceive
             action=agent.seq.pop(0)
             print("Agent decided to do {}.".format(action))
             actions.append(action)

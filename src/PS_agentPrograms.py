@@ -2,12 +2,53 @@
 from src.nodeClass import Node
 from queue import PriorityQueue
 
+import math
+
 nodeColors={
     "start":"red",
     "goal": "green",
     "frontier": "orange",
     "expanded":"pink"
 }
+
+
+def A_StarSearchAgentProgram(f=None):
+  
+    #f=math.dist
+    
+    def program(problem):
+      print("Hi")
+
+      node = Node(problem.initial)
+ 
+      frontier = PriorityQueue()
+      h=node.path_cost+round(math.dist(node.state, problem.goal),3)
+      frontier.put((h,node))
+      reached = {problem.initial:node}
+
+      while frontier:
+        print(frontier.queue)
+        node = frontier.get()[1]
+        print("The node {} is extracted from frontier:".format(node.state))
+
+        if problem.goal_test(node.state):
+          print("We have found our goal: {}".format (node.state))
+          return node
+
+        #reached.add(node.state)
+        for child in node.expand(problem):
+            if child.state not in reached or child.path_cost<reached[child.state].path_cost:
+                #print(child)
+                print("The child node {}.".format(child))
+                h=child.path_cost+round(f(child.state, problem.goal),3)
+                frontier.put((h,child))
+                reached.update({child.state:child})
+            
+      return None
+
+    return program
+
+
 
 def BestFirstSearchAgentProgram(f=None):
   #with BFS we choose a node, n, with minimum value of some evaluation function, f (n).
@@ -47,9 +88,9 @@ def BestFirstSearchAgentProgram(f=None):
     return program
   
  
-def IDSearchAgentProgram(f=None):
-  def program(problem):
-    #your code here
+# def IDSearchAgentProgram(f=None):
+#   def program(problem):
+#     #your code here
     
  
       
