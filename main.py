@@ -22,7 +22,17 @@ if __name__ == "__main__":
     print(f"Goal Location: {environment.goal_location}")
     # Run the environment
     while not environment.is_done():
-        print(environment.maze)
-        print(f"Agent Location: {agent.state}")
-        print(f"Agent Performance: {agent.performance}")
         environment.step()
+
+    print("The agents are done.")
+    for agent in environment.agents:
+        if agent.status == "Finished":
+            print(f"Agent {agent} has reached the goal!")
+        elif not agent.alive:
+            print(f"Agent {agent} has died.")
+        else:
+            print(f"Agent {agent} is still alive but did not reach the goal.")
+    print("Final Maze State:")
+    print(environment.maze)
+    print(f"Agent Final Location: {agent.state}")
+    print(f"Agent Final Performance: {agent.performance}")

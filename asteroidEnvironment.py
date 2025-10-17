@@ -162,11 +162,19 @@ class AsteroidEnvironment(Environment):
         # not used
         raise NotImplementedError
     
-    def execute_action(self, agent: SatelliteAgent, action: AstroidMazeAction) -> None:
-        if agent.alive == False:
-            print("Agent {} is dead.".format(agent))
-        
+    def execute_action(self, agent: SatelliteAgent, action: AstroidMazeAction | None) -> None:
+        if agent.status != "Alive":
+            print("Agent {} could not move because it {}.".format(agent, agent.status))
+            return
+
+        if action not in self.possible_actions_from_state(agent.state).get(agent.state, []):
+            raise ValueError(f"Action {action} is not valid from state {agent.state}")
+
         agent.state = self.move(agent, action)
+
+        if agent.state == self.goal_location:
+            agent.status = "Finished"
+        
         agent.performance -= 1
         for enemy in self.enemies:
             if agent.state == enemy[0]:
@@ -177,9 +185,9 @@ class AsteroidEnvironment(Environment):
                     new_performance = agent.performance * .10
                     agent.performance = old_performance - new_performance
                     print("Agent {} encountered an enemy at location {} and lost {} performance points. Remaining performance: {}.".format(agent, enemy[0], old_performance, agent.performance))
-                if agent.performance <= 0:
-                    agent.alive = False
-                    print("Agent {} has been killed by an enemy at location {}.".format(agent, enemy[0]))
+        if agent.performance <= 0:
+            agent.alive = False
+            print("Agent {} has run out of performance and is dead.".format(agent))
 
     def get_random_empty_location(self) -> tuple[int, int] | None:
         if self.maze is None:
@@ -191,15 +199,12 @@ class AsteroidEnvironment(Environment):
                 return (x, y)
     
     def is_done(self) -> bool:
-        return super().is_done()
+        return not any(agent.status == "Alive" for agent in self.agents)
 
     def step(self) -> None:
-        if self.is_done():
-            print("There is no one here who could work...")
-            return
         actions = []
         for agent in self.agents:
-            if agent.alive:
+            if agent.status == "Alive":
                 action = agent.pick_action()
                 print("Agent: {} has decided to do action: {}".format(agent, action))
                 actions.append(action)
@@ -207,10 +212,9 @@ class AsteroidEnvironment(Environment):
                 actions.append("")
             
             for agent, action in zip(self.agents, actions):
+                if agent.status != "Alive":
+                    continue
                 self.execute_action(agent, action)
-        else:
-            print("There is no one here who could work...")
-                
          
     def run(self, steps=10) -> None:
         super().run(steps)

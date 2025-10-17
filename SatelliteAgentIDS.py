@@ -9,39 +9,60 @@ class SatelliteAgentIterativeDeepeningSearch(SatelliteAgent):
     def __init__(self, problem, initial_performance: float):
         super().__init__(problem, initial_performance)
 
-    def make_plan(self) -> list[AstroidMazeAction | None]:
-        depth = 0
+    def __repr__(self) -> str:
+        return super().__repr__()
+
+    def make_plan(self) -> list[AstroidMazeAction]:
+        depth = 1
         while True:
             result = self.depth_limited_search(self.problem, depth)
+            if result == "fail":
+                print("No solution found.")
+                return []
             if result != 'cutoff':
-                if result is None:
-                    raise Exception("No solution found")
-                if result is not None:
-                    r = list(map(lambda node: cast(AstroidMazeAction | None, node.action), result))
-                    return r
+                print(result)
+                return result
             depth += 1
+            print(f"Increasing depth to {depth}")
 
     def depth_limited_search(self, problem: AsteroidMazeProblem, limit: int):
 
-        def recursive_dls(node: Node, problem: AsteroidMazeProblem, limit: int) -> list[Node] | None | Literal['cutoff']:
+        visited: set[tuple[int, int]] = set()
+
+        def recursive_dls(node: Node, problem: AsteroidMazeProblem, limit: int):
             cutoff_occurred = False
-            if problem.goal_test(node.state):
+            visited.add(node.state)
+
+            if problem.goal_test(node.state) == True:
                 print(f"Goal test passed at state {node.state} at depth {node.depth}")
                 return node.solution()
+
             elif limit == 0:
                 return 'cutoff'
+
             else:
-                for action in problem.actions(node.state) or []:
-                    print(f"Exploring action {action} from state {node.state} at depth {node.depth}")
-                    result = recursive_dls(Node(problem.result(node.state, action), node, action, 1), problem, limit - 1)
+                actions = problem.actions(node.state) or []
+                for action in actions:
+
+                    new_coords = problem.result(node.state, action)
+                    # print(f"Exploring action {action} from state {node.state} new coords {new_coords} at depth {node.depth}")
+                    if new_coords is None:
+                        continue
+
+                    if new_coords in visited:
+                        continue
+
+                    result = recursive_dls(Node(new_coords, node, action, node.path_cost + 1), problem, limit - 1)
                     if result == 'cutoff':
                         cutoff_occurred = True
-                    elif result is not None:
-                        print(f"Goal found! Action sequence: {result}")
+
+                    elif result != "fail":
                         return result
+
             if cutoff_occurred:
                 return 'cutoff'
+
             else:
-                return None
+                return "fail"
 
         return recursive_dls(Node(problem.initial), problem, limit)
