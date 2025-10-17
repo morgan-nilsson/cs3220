@@ -129,20 +129,28 @@ class AsteroidEnvironment(Environment):
         return {state: good}
     
     def makeMazeTransformationModel(self, mazeActs: dict[tuple[int, int], list[AstroidMazeAction]]):
-        mazeStateSpace = {}
-        for state, actionsList in mazeActs.items():
-            moves = []  # reset for each state
-            for action in actionsList:
+        moves = {}  # reset for each state
+        for key in mazeActs:
+            for action in mazeActs[key]:
                 if action == AstroidMazeAction.UP.value:
-                    moves.append("UP")
-                if action == AstroidMazeAction.DOWN.value:
-                    moves.append("DOWN")
-                if action == AstroidMazeAction.RIGHT.value:
-                    moves.append("RIGHT")
-                if  action == AstroidMazeAction.LEFT.value:
-                    moves.append("LEFT")
-            mazeStateSpace[state] = moves
-        return mazeStateSpace
+                    x=key[0]
+                    y=key[1]-1
+                    moves.setdefault(key, {})["up"] = (x, y)
+                elif action == AstroidMazeAction.DOWN.value:
+                    x=key[0]
+                    y=key[1]+1
+                    moves.setdefault(key, {})["down"] = (x, y)          
+                elif action == AstroidMazeAction.RIGHT.value:
+                    x=key[0]+1
+                    y=key[1]
+                    moves.setdefault(key, {})["right"] = (x, y)
+                elif  action == AstroidMazeAction.LEFT.value:
+                    x=key[0]-1
+                    y=key[1]
+                    moves.setdefault(key, {})["left"] = (x, y)
+            if len(mazeActs[key])==0:
+                moves.setdefault(key,{})
+        return moves
 
         
     def move(self, agent: SatelliteAgent, action: AstroidMazeAction) -> tuple[int, int]:
