@@ -222,7 +222,6 @@ class AsteroidEnvironment(Environment):
                 actions.append(action)
             else:
                 actions.append("")
-            
         for agent, action in zip(self.agents, actions):
             if agent.status != "Alive":
                 continue
@@ -233,3 +232,93 @@ class AsteroidEnvironment(Environment):
 
     def add_agent(self, agent: SatelliteAgent) -> None:
         self.agents.append(agent)
+
+    def show_graph(self, filename:str="AsteroidMaze.html"):
+        from pyvis.network import Network
+        from src.maze2025GraphClass import mazeGraph
+        from src.mazeData import mazeStatesLocations
+        from src.mazeData import intTupleTostr
+
+        # Convert maze data to more usable graph
+        maze_actions = self.defineMazeActions()
+        maze_transformation = self.makeMazeTransformationModel(maze_actions)
+
+        mazePossibleActs = {}
+        for state, value in maze_actions.items():
+            key = self.possible_actions_from_state(state)
+            for i, j in key.items():
+                mazePossibleActs[i] = j
+
+        maze1TM = {}
+        maze1TM = self.makeMazeTransformationModel(mazePossibleActs)
+        mazeWorldGraph = mazeGraph(maze1TM, mazeStatesLocations(list(maze1TM.keys())))
+
+        net_maze = Network( heading="Lab4. Examples of Maze World Problem",
+                bgcolor ="#242020",
+                font_color = "white",
+                height = "750px",
+                width = "100%") # do this
+        nodeColors={
+            "start":"green",
+            "goal":"red",
+            "agent1":"orange",
+            "agent2":"purple",
+            "both":"pink",
+            "enemy":"blue",
+            "asteroid":"grey",
+            "path": "white"
+        }
+        nodeColorsList=[]
+        for node in mazeWorldGraph.origin.keys():
+            node_value = self.maze.get(node[0], node[1])
+            if node == self.agents[0].state and node == self.agents[1].state:
+                nodeColorsList.append(nodeColors["both"])
+            elif node == self.agents[0].state:
+                nodeColorsList.append(nodeColors["agent1"])
+            elif node == self.agents[1].state:
+                nodeColorsList.append(nodeColors["agent2"])
+            elif node == self.initial_location:
+                nodeColorsList.append(nodeColors["start"])
+            elif node == self.goal_location:
+                nodeColorsList.append(nodeColors["goal"])
+            elif node_value == MazeComponents.ENEMIES.value:
+                nodeColorsList.append(nodeColors["enemy"])
+            elif node_value == MazeComponents.ASTEROID.value:
+                nodeColorsList.append(nodeColors["asteroid"])
+            else:
+                nodeColorsList.append(nodeColors["path"])
+
+        nodes=["-".join(str(item) for item in el) for el in mazeWorldGraph.origin.keys()]
+
+        x_coords = []
+        y_coords = []
+
+        for node in mazeWorldGraph.origin.keys():
+            x,y=mazeWorldGraph.getLocation(node)
+            x_coords.append(x)
+            y_coords.append(y)
+        
+        sizes=[10]*len(nodes)
+
+        net_maze.add_nodes(nodes, color=nodeColorsList, x=x_coords, y=y_coords, size=sizes, title=nodes)
+
+        for node in net_maze.nodes:
+            node['label']=''
+
+        edge_weights = {}
+        for init_state, list_of_edges in mazeWorldGraph.origin.items():
+            state_str = intTupleTostr(init_state)
+            for move, target in list_of_edges.items():
+                target_str = intTupleTostr(target)
+                edge_weights[(state_str, target_str)] = move
+
+        edges=[]
+
+        for node_source in mazeWorldGraph.nodes():
+            for node_target, action in mazeWorldGraph.get(node_source).items():
+                #node_target or node_source is a tuple -> convert to str
+                if (intTupleTostr(node_source),intTupleTostr(node_target)) not in edges and (intTupleTostr(node_target), intTupleTostr(node_source)):
+                    net_maze.add_edge(intTupleTostr(node_source),intTupleTostr(node_target), label=edge_weights[(intTupleTostr(node_source),intTupleTostr(node_target))])
+                    edges.append((intTupleTostr(node_source),intTupleTostr(node_target)))
+        net_maze.toggle_physics(False)
+        net_maze.save_graph(filename)
