@@ -225,8 +225,8 @@ def mazeStatesLocations(keyList):
   y = []
   
   for elem in keyList:
-    x.append(elem[1]*100)
-    y.append(elem[0]*100)
+    x.append(elem[0]*100)
+    y.append(elem[1]*100)
  
   zipped = zip(x, y)
   return dict(zip(keyList, zipped))

@@ -39,6 +39,6 @@ graph_container = st.container()
 
 # Display the current state in the container
 with graph_container:
-    environment.show_graph("PacManEnv.html")
-    HTMLFile = open('PacManEnv.html', 'r', encoding='utf-8')
+    environment.show_graph("PacMan_StreamLit.html")
+    HTMLFile = open('PacMan_StreamLit.html', 'r', encoding='utf-8')
     components.html(HTMLFile.read(), height=800, width=1000)
