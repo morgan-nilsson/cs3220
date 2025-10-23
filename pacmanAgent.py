@@ -15,7 +15,8 @@ class PacManAgent:
         return f"{self.__class__.__name__}"
 
     def pick_action(self) -> PacManAction | None:
-        if self.problem.goal_test(self.state):
+        if self.status == "Finished":
+            print("Agent {} has already finished.".format(self))
             return None
         if self.status != "Alive":
             return None
@@ -24,7 +25,8 @@ class PacManAgent:
             print("Agent {} has created a new plan: {}".format(self, self.plan))
         # if still no plan there is likely no solution
         if not self.plan or len(self.plan) == 0:
-            self.alive = False
+            self.status = "Stuck"
+            print("Agent {} is stuck and cannot find a plan.".format(self))
             return None
         return self.plan.pop(0)
 

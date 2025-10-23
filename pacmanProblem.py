@@ -1,6 +1,5 @@
 from src.problemClass import Problem
 from pacmanEnvironment import PacManEnvironment, PacManAction
-from numpy import matrix
 
 class PacManProblem(Problem):
     def __init__(self, initial: tuple[int, int], environment: PacManEnvironment, goal: tuple[int, int] | None = None):

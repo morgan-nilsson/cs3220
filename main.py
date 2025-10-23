@@ -16,7 +16,7 @@ if __name__ == "__main__":
 
     if environment.maze is None:
         raise ValueError("Maze is not defined in the environment.")
-    agent = PacManAgentAStar(problem, initial_performance=0.3 * environment.maze.N())
+    agent = PacManAgentAStar(problem, initial_performance=50) #0.3 * environment.maze.N())
 
     environment.add_agent(agent)
 

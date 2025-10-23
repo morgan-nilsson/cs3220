@@ -6,7 +6,7 @@ from src.nodeClass import Node
 #expansion prioritized for nodes with lower f-score
 #f(n) = actual cost g(n) + estimated cost h(n)
 
-MAX_ITERATIONS = 1000000000
+MAX_ITERATIONS = 50
 
 class PacManAgentAStar(PacManAgent):
     def make_plan(self) -> list[PacManAction]:
@@ -15,49 +15,57 @@ class PacManAgentAStar(PacManAgent):
             all_locations = [self.problem.environment.goal_location]
         mapping = {}
         for location in all_locations:
-            self.problem.goal = location
-            mapping[location] = self.aStarPlan()
+            if location is None:
+                continue
+            plan = self.aStarPlan(location)
+            if plan == "failure":
+                mapping[location] = []
+            else:
+                mapping[location] = plan
+        print("Mapping of locations to plans: ", mapping)
 
 
         min_index = 0
         for i in range(1, len(all_locations)):
+            if mapping[all_locations[i]] == []:
+                continue
             if len(mapping[all_locations[i]]) < len(mapping[all_locations[min_index]]):
                 min_index = i
 
         self.problem.goal = all_locations[min_index]
         return mapping[all_locations[min_index]]
 
-    def aStarPlan(self):
+    
+    def aStarPlan(self, goal: tuple[int, int]):
+        MAX_ITERATIONS = float('inf')
 
-        seen_list: set[Node] = set() 
+        def DFS_contour(node: Node, goal: tuple[int, int], f_limit: float):
+            if goal is None:
+                return None, float('inf')
+            f_cost = self.problem.heuristic_function(node.state, goal) + node.path_cost
 
-        def DFS_contour(node: Node, f_limit: int):
-            if node.state in seen_list:
-                return None, MAX_ITERATIONS
+            next_f = float('inf')
 
-            if self.problem.goal == None:
-                raise ValueError("Goal state is not defined in the problem.")
-
-            f_cost = self.problem.heuristic_function(node.state, self.problem.goal) + node.path_cost
             if f_cost > f_limit:
                 return None, f_cost
 
-            seen_list.add(node)
+            if goal == node.state:
+                return node, f_cost
 
-            if self.problem.goal_test(node.state):
-                return node, f_limit
+            actions = self.problem.actions(node.state)
+            if actions is None:
+                return None, float('inf')
+            for action in actions:
+                child_state = self.problem.result(node.state, action)
+                child_cost = node.path_cost + self.problem.path_cost(node.path_cost, node.state, action, child_state)
+                child_node = Node(child_state, node, action, child_cost)
 
-            next_f = MAX_ITERATIONS
+                if any(n.state == child_state for n in seen_list):
+                    continue
 
-            successors = self.problem.actions(node.state)
-            if successors == None:
-                raise ValueError("No successors.")
+                seen_list.append(child_node)
 
-            for s in successors:
-                s_loc = self.problem.result(node.state, s)
-               
-                child_cost = self.problem.heuristic_function(node.state, s_loc) + f_cost
-                solution, new_f = DFS_contour(Node(s_loc, node, s, child_cost), f_limit)
+                solution, new_f = DFS_contour(child_node, goal, f_limit)
 
                 if solution is not None:
                     return solution, f_limit
@@ -67,10 +75,16 @@ class PacManAgentAStar(PacManAgent):
             return None, next_f
 
         root = Node(self.state, None, None, 0)
-        f_limit = 0
+        f_limit = self.problem.heuristic_function(root.state, goal)
+
         while True:
-            solution, f_limit = DFS_contour(root, f_limit)
+            seen_list: list[Node] = [root]
+            solution, new_limit = DFS_contour(root, goal, f_limit)
+
             if solution is not None:
-                return solution.solution()
-            if f_limit >= MAX_ITERATIONS:
+                return solution.solution()  # Reconstructs the path
+
+            if new_limit == float('inf'):
                 return "failure"
+
+            f_limit = new_limit

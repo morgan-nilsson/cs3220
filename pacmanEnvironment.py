@@ -85,9 +85,7 @@ class PacManEnvironment(Environment):
             empty_location = self.get_random_location_without_ghosts()
             if empty_location != None:
                 self.ghost_locations.append(empty_location)
-                x = empty_location[0]
-                y = empty_location[1]
-                self.maze.set(x, y, PacManComponents.GHOST.value)
+                self.maze.set(empty_location[0], empty_location[1], PacManComponents.GHOST.value)
                 i += 1
             else:
                 continue
@@ -244,11 +242,12 @@ class PacManEnvironment(Environment):
 
         
             if agent.state in self.food_dot_locations:
+                print("Agent {} has eaten food at location {} and doubled its performance.".format(agent, agent.state))
                 self.food_dot_locations.remove(agent.state)
                 agent.performance *= 2
 
         if agent.performance <= 0:
-            agent.alive = False
+            agent.status = "Dead"
             print("Agent {} has run out of performance and is dead.".format(agent))
 
 
@@ -318,7 +317,8 @@ class PacManEnvironment(Environment):
             "agent":"purple",
             "ghost":"red",
             "path":"white",
-            "wall":"grey"
+            "wall":"grey",
+            "end":"blue"
         }
 
         nodeColorsList=[]
@@ -326,6 +326,8 @@ class PacManEnvironment(Environment):
             node_value = self.maze.get(node[0], node[1])
             if node == self.agents[0].state:
                 nodeColorsList.append(nodeColors["agent"])
+            elif node == self.goal_location:
+                nodeColorsList.append(nodeColors["end"])
             elif node == self.initial_location:
                 nodeColorsList.append(nodeColors["start"])
             elif node_value==0:
