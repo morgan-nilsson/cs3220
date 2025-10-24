@@ -11,7 +11,7 @@ if 'environment' not in st.session_state:
     n = 7
     environment = PacManEnvironment(n)
     problem = PacManProblem(environment.initial_location, environment, environment.goal_location)
-    agent_Astar = PacManAgentAStar(problem, environment.maze.N() / 2)
+    agent_Astar = PacManAgentAStar(problem, environment.maze.N() * 0.3)
     environment.add_agent(agent_Astar)
     st.session_state.environment = environment
     st.session_state.agent_Astar = agent_Astar

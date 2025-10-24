@@ -37,7 +37,6 @@ class PacManAgentAStar(PacManAgent):
 
     
     def aStarPlan(self, goal: tuple[int, int]):
-        MAX_ITERATIONS = float('inf')
 
         def DFS_contour(node: Node, goal: tuple[int, int], f_limit: float):
             if goal is None:
@@ -61,7 +60,11 @@ class PacManAgentAStar(PacManAgent):
                 child_node = Node(child_state, node, action, child_cost)
 
                 if any(n.state == child_state for n in seen_list):
-                    continue
+                    index = seen_list.index(next(n for n in seen_list if n.state == child_state))
+                    if seen_list[index].path_cost <= child_node.path_cost:
+                        continue
+                    else:
+                        del seen_list[index]
 
                 seen_list.append(child_node)
 
