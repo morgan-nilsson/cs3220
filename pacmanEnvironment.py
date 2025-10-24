@@ -53,6 +53,7 @@ class PacManEnvironment(Environment):
         self.initial_location = self.get_random_empty_location()
         if self.initial_location is None:
             raise ValueError("No empty location found for initial agent placement.")
+        self.goal_location = self.get_random_empty_location()
         while self.goal_location == self.initial_location:
             self.goal_location = self.get_random_empty_location()
         if self.goal_location is None:
