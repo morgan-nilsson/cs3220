@@ -58,13 +58,22 @@ def build_pyvis_from_domain(domains, nodes, neighbors, outfile):
     nodeColors = {
         "empty": "white",
         "filled": "yellow",
+        "asterisk_empty": "pink",
+        "asterisk_filled": "red"
     }
 
     nodeColorsList=[]
     nodeTitles=[]
 
     for node in nodes:
-        if len(domains[node])==1:
+        if node in ['B5', 'C3', 'C7', 'E2', 'E5', 'E8', 'G3', 'G7', 'H5']:
+            if len(domains[node])==1:
+                nodeColorsList.append(nodeColors["asterisk_filled"])
+                nodeTitles.append(str(domains[node][0]))
+            else:
+                nodeTitles.append(str(domains[node]))
+                nodeColorsList.append(nodeColors["asterisk_empty"])
+        elif len(domains[node])==1:
             nodeColorsList.append(nodeColors["filled"])
             nodeTitles.append(str(domains[node][0]))
         else:
