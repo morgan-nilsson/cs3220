@@ -3,7 +3,7 @@ from pyvis.network import Network
 import os
 import streamlit.components.v1 as components
 
-from src.algorithms import BacktrackStepper
+from src.algorithms import BacktrackStepper, backtracking_search
 
 from seatingCSP import seatingCSP
 
@@ -128,17 +128,33 @@ placeholder = st.empty()
 
 step = st.button("Step Full Solution")
 reset_clicked = st.button("Reset")
+full_solution = st.button("Full solution")
 
 if step:
     placeholder.empty()
     result = stepper.step()
     current_filled = result[1]
     print(current_filled)
+
+    if(current_filled is not None and len(current_filled) <= len(CSP.domains)):
+        with placeholder:
+            buildGraph(CSP, current_filled)
+    else:
+        with placeholder:
+            resultFull = backtracking_search(CSP)
+            buildGraph(CSP, resultFull)
+
+
+elif full_solution:
+    placeholder.empty()
+    resultFull = backtracking_search(CSP)
     with placeholder:
-        buildGraph(CSP, current_filled)
+        buildGraph(CSP, resultFull)
 
 elif reset_clicked:
     placeholder.empty()
+    stepper = BacktrackStepper(CSP)
+    st.session_state.stepper = stepper
     with placeholder:
         buildGraph(CSP)
 

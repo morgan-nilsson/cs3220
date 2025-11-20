@@ -96,25 +96,25 @@ def unordered_domain_values(var, assignment, csp):
     return csp.choices(var)
 
 
-# def backtracking_search(csp, select_unassigned_variable=first_unassigned_variable, order_domain_values=unordered_domain_values):
-#     
-#     def backtrack(assignment):
-#         if len(assignment) == len(csp.variables):
-#             return assignment
-# 
-#         var = select_unassigned_variable(assignment, csp)
-#         for value in order_domain_values(var, assignment, csp):
-#             if csp.nconflicts(var, value, assignment)==0:
-#                 csp.assign(var, value, assignment)
-#                 result = backtrack(assignment)
-#                 if result is not None:
-#                   return result
-#                 
-#             csp.unassign(var, assignment)
-#         return None
-# 
-#     result = backtrack({})
-#     return result
+def backtracking_search(csp, select_unassigned_variable=first_unassigned_variable, order_domain_values=unordered_domain_values):
+    
+    def backtrack(assignment):
+        if len(assignment) == len(csp.variables):
+            return assignment
+
+        var = select_unassigned_variable(assignment, csp)
+        for value in order_domain_values(var, assignment, csp):
+            if csp.nconflicts(var, value, assignment)==0:
+                csp.assign(var, value, assignment)
+                result = backtrack(assignment)
+                if result is not None:
+                  return result
+                
+            csp.unassign(var, assignment)
+        return None
+
+    result = backtrack({})
+    return result
 
 class BacktrackStepper:
   def __init__(self, cps, select_unassigned_variable=first_unassigned_variable, order_domain_values=unordered_domain_values) -> None:
