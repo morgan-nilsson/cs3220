@@ -38,8 +38,6 @@ def main():
     astCSP = AstSodokuCSP(9, initial)
 
     astCSP.AC3()
-    # csp.curr_domains is now AC3 reduced domains
-
     # initial = {
     #     "A1": 3,
     #     "A2": 2,
