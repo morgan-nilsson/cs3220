@@ -116,4 +116,34 @@ def backtracking_search(csp, select_unassigned_variable=first_unassigned_variabl
     result = backtrack({})
     return result
 
+class BacktrackStepper:
+  def __init__(self, cps, select_unassigned_variable=first_unassigned_variable, order_domain_values=unordered_domain_values) -> None:
+    self.cps = cps
+    self.select_unassigned_variable = select_unassigned_variable
+    self.order_domain_values = order_domain_values
+    self.backtrack_stack = [{}]
+    self.completed = False
+  
+  def step(self):
 
+    if self.completed:
+        return (self.backtrack_stack[-1], None)
+
+    # get the current assignment stack
+    assignment = self.backtrack_stack[-1]
+
+    # check if assignment is complete
+    if len(assignment) == len(self.cps.variables):
+        self.completed = True
+        return (assignment, None)
+    
+    var = self.select_unassigned_variable(assignment, self.cps)
+    for value in self.order_domain_values(var, assignment, self.cps):
+        if self.cps.nconflicts(var, value, assignment)==0:
+            self.cps.assign(var, value, assignment)
+            self.backtrack_stack.append(assignment.copy())
+            return (None, assignment)
+            
+        self.cps.unassign(var, assignment)
+    self.backtrack_stack.pop()
+    return (None, None)

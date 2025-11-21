@@ -3,7 +3,7 @@ from pyvis.network import Network
 import os
 import streamlit.components.v1 as components
 
-from src.algorithms import backtracking_search
+from src.algorithms import BacktrackStepper, backtracking_search
 
 from seatingCSP import seatingCSP
 
@@ -11,8 +11,8 @@ from seatingCSP import seatingCSP
 
 def buildCSP():
     neighbors = "1: 2 6; 2: 3; 3: 4; 4: 5; 5: 6; 6: "
-    varibles = ['1', '2', '3', '4', '5', '6']
-    domain = ['A', 'B', 'C', 'D', 'E', '_']
+    variables = ['1', '2', '3', '4', '5', '6']
+    domain = ['A', 'B', 'C', 'D', 'E', 'F']
     filled = {}
 
     def seating_constraint(X, x, Y, y):
@@ -25,11 +25,11 @@ def buildCSP():
         return (x, y) not in forbidden
     constraint = seating_constraint
     
-    CSP = seatingCSP(varibles, neighbors, domain, filled, constraint)
+    CSP = seatingCSP(variables, neighbors, domain, filled, constraint)
     return CSP
 
 
-def buildGraph(CSP, backTrackColor = None):
+def buildGraph(CSP, current_filled = None):
     nodes = CSP.variables
     net_sudoku = Network( heading="Lab7. Seating CSP",
                 bgcolor ="#1C1919",
@@ -41,13 +41,13 @@ def buildGraph(CSP, backTrackColor = None):
     
 
     nodeColors = {
-    'filled': "white",
-    'A' : "red",
-    'B' : "blue",
-    'C' : 'green',
-    'D' : 'yellow',
-    'E' : 'orange',
-    '_' : 'purple'
+        'A' : "red",
+        'B' : "blue",
+        'C' : 'green',
+        'D' : 'yellow',
+        'E' : 'orange',
+        'F' : 'purple',
+        'unfilled': 'gray'
     }
 
     sizes=[10]*len(nodes)
@@ -77,24 +77,24 @@ def buildGraph(CSP, backTrackColor = None):
 
 
     for i, node in enumerate(nodes):
-        colorPicked = "filled"
         node_domain = ""
-        node_lable = node
+        node_label = f"Seat: {i}"
+        colorPicked = 'unfilled'
         for j in CSP.domains[node]:
             node_domain += " " + str(j)
-            if(backTrackColor is not None):
-                node_lable = str(backTrackColor.get(node))
-                node_domain = node
-                colorPicked = backTrackColor.get(node)
-    
+        if current_filled and node in current_filled:
+            colorPicked = current_filled[node]
+            node_label += f"\nEmployee: {current_filled[node]}"
+
         net_sudoku.add_node(
-                        node, 
-                        color=nodeColors[colorPicked],
-                        label= node_lable,
-                        title = node_domain,
-                        size=sizes[i], 
-                        x=x_coords[i], 
-                        y=y_coords[i])
+            node, 
+            color=nodeColors[colorPicked],
+            label= node_label,
+            title = node_domain,
+            size=sizes[i], 
+            x=x_coords[i], 
+            y=y_coords[i]
+        )
     
 
     for nodeFrom in CSP.neighbors.keys():
@@ -113,8 +113,11 @@ def buildGraph(CSP, backTrackColor = None):
 if 'CSP' not in st.session_state:
     CSP = buildCSP()
     st.session_state.CSP = CSP
+    stepper = BacktrackStepper(CSP)
+    st.session_state.stepper = stepper
 else:
     CSP = st.session_state.CSP
+    stepper = st.session_state.stepper
 
 
 st.set_page_config(layout="wide")
@@ -123,17 +126,35 @@ st.title("LAB7 TASK1")
 
 placeholder = st.empty()
 
-run_full = st.button("Run Full Solution")
+step = st.button("Step Full Solution")
 reset_clicked = st.button("Reset")
+full_solution = st.button("Full solution")
 
-if run_full:
+if step:
     placeholder.empty()
-    result = backtracking_search(CSP)
+    result = stepper.step()
+    current_filled = result[1]
+    print(current_filled)
+
+    if(current_filled is not None and len(current_filled) <= len(CSP.domains)):
+        with placeholder:
+            buildGraph(CSP, current_filled)
+    else:
+        with placeholder:
+            resultFull = backtracking_search(CSP)
+            buildGraph(CSP, resultFull)
+
+
+elif full_solution:
+    placeholder.empty()
+    resultFull = backtracking_search(CSP)
     with placeholder:
-        buildGraph(CSP, result)
+        buildGraph(CSP, resultFull)
 
 elif reset_clicked:
     placeholder.empty()
+    stepper = BacktrackStepper(CSP)
+    st.session_state.stepper = stepper
     with placeholder:
         buildGraph(CSP)
 
