@@ -1,4 +1,6 @@
 from astSodokuCSP import AstSodokuCSP
+from src.algorithms import backtracking_search
+from pyvis.network import Network
 
 def main():
 
@@ -23,7 +25,7 @@ def main():
         "F7": 2,
         "G2": 2,
         "G4": 4,
-        "G5": 1,
+        "G6": 1,
         "G8": 9,
         "H1": 9,
         "H3": 4,
@@ -35,76 +37,78 @@ def main():
 
     astCSP = AstSodokuCSP(9, initial)
 
+    astCSP.AC3()
+    # csp.curr_domains is now AC3 reduced domains
+
     # initial = {
     #     "A1": 3,
     #     "A2": 2,
     #     "B1": 1,
     # }
     # astCSP = AstSodokuCSP(3, initial)
+    # astCSP.AC3()
+    result = backtracking_search(astCSP)
+    print("Final Result:", result)
 
-    build_pyvis_from_domain(astCSP.domains, astCSP.variables, astCSP.neighbors, "ast_sudoku_initial.html")
-    build_pyvis_from_domain(astCSP.curr_domains, astCSP.variables, astCSP.neighbors, "ast_sudoku_ac3.html")
+    build_visualization(result, "sudoku.html")
 
-def build_pyvis_from_domain(domains, nodes, neighbors, outfile):
-    from pyvis.network import Network
+def build_visualization(result, filename="sudoku.html"):
+    rows = "ABCDEFGHI"
+    cols = "123456789"
 
-    net_sudoku = Network( heading="Lab6. Simple Sudoku constraints",
-        bgcolor ="#242020",
-        font_color = "white",
-        height = "750px",
-        width = "100%"
-    )
+    astroid_nodes = ['B5', 'C3', 'C7', 'E2', 'E5', 'E8', 'G3', 'G7', 'H5']
 
-    nodeColors = {
-        "empty": "white",
-        "filled": "yellow",
-        "asterisk_empty": "pink",
-        "asterisk_filled": "red"
-    }
+    net = Network(height="800px", width="800px", notebook=False, directed=False)
 
-    nodeColorsList=[]
-    nodeTitles=[]
+    net.toggle_physics(False)
 
-    for node in nodes:
-        if node in ['B5', 'C3', 'C7', 'E2', 'E5', 'E8', 'G3', 'G7', 'H5']:
-            if len(domains[node])==1:
-                nodeColorsList.append(nodeColors["asterisk_filled"])
-                nodeTitles.append(str(domains[node][0]))
+    # Create nodes with fixed positions
+    for r_i, r in enumerate(rows):
+        for c_i, c in enumerate(cols):
+
+            key = f"{r}{c}"
+            value = result.get(key, 0)
+
+            label = str(value) if value != 0 else ""
+
+            node_id = key
+
+            x = c_i * 80
+            y = r_i * 80
+
+            if key in astroid_nodes:
+                color = "#ff4c4c"
             else:
-                nodeTitles.append(str(domains[node]))
-                nodeColorsList.append(nodeColors["asterisk_empty"])
-        elif len(domains[node])==1:
-            nodeColorsList.append(nodeColors["filled"])
-            nodeTitles.append(str(domains[node][0]))
-        else:
-            nodeColorsList.append(nodeColors["empty"])
-            nodeTitles.append(str(domains[node]))
+                color = "#97c2fc"
 
-    sizes=[10]*len(nodes)
-    nodes=list(nodes)
+            net.add_node(
+                node_id,
+                label=label,
+                title=f"{key}: {label}",
+                x=x,
+                y=y,
+                physics=False,
+                color=color,
+                shape="circle"
+            )
 
-    x_coords = []
-    y_coords = []
+    # Connect horizontal neighbors
+    for r in rows:
+        for c_i in range(8):
+            a = f"{r}{cols[c_i]}"
+            b = f"{r}{cols[c_i+1]}"
+            net.add_edge(a, b, color="#cccccc")
+    
+    # Connect vertical neighbors
+    for c in cols:
+        for r_i in range(8):
+            a = f"{rows[r_i]}{c}"
+            b = f"{rows[r_i+1]}{c}"
+            net.add_edge(a, b, color="#cccccc")
 
-    for node in nodes:
-        row = ord(node[0]) - ord('A')
-        col = int(node[1:]) - 1
-        x_coords.append(col * 100)
-        y_coords.append(row * 100)
+    net.show(filename, notebook=False)
+    print(f"Sudoku visualization saved to {filename}")
 
-    net_sudoku.add_nodes(nodes, title=nodeTitles, color=nodeColorsList, size=sizes, x=x_coords, y=y_coords)
-
-    for nodeFrom in neighbors.keys():
-        for nodeTo in neighbors[nodeFrom]:
-            if nodeFrom[0]==nodeTo[0]: # row const-s
-                net_sudoku.add_edge(nodeFrom,nodeTo, color="red")
-            elif nodeFrom[1]==nodeTo[1]: # col const-s
-                net_sudoku.add_edge(nodeFrom,nodeTo, color="blue")
-            else:
-                net_sudoku.add_edge(nodeFrom,nodeTo, color="green") # diag con-s
-            
-    net_sudoku.toggle_physics(False)
-    net_sudoku.show(outfile, notebook=False)
 
 if __name__ == "__main__":
     main()

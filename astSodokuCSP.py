@@ -31,7 +31,8 @@ class AstSodokuCSP(CSP):
 
         super().__init__(sudokuNeighbors.keys(), sudokuDomains, sudokuNeighbors, lambda A, a, B, b: asteriskSodokuConstraint(A, a, B, b))
 
-        self.ac3result = AC3(self)
+    def AC3(self):
+        return AC3(self)
 
 def asteriskSodokuConstraint(A: str, a: int, B: str, b: int) -> bool:
     if A[0] == B[0] or A[1] == B[1]:
