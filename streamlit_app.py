@@ -13,6 +13,7 @@ def main():
         st.session_state.stepper = stepper
         st.session_state.initial_render = True
         initial_render = True
+        st.session_state.steps = None
     else:
         CSP = st.session_state.CSP
         stepper = st.session_state.stepper
@@ -23,31 +24,35 @@ def main():
 
     placeholder = st.empty()
 
-    step = st.button("Step Full Solution")
-    reset_clicked = st.button("Reset")
-    full_solution = st.button("Full solution")
+    if "run" not in st.session_state:
+        st.session_state.run = False
 
-    if step:
-        placeholder.empty()
-        result = stepper.step()
-        current_filled = result[1]
-        print(current_filled)
+    # if st.button("Start"):
+    #     st.session_state.run = True
 
-        if(current_filled is not None and len(current_filled) <= len(CSP.domains)):
+    if st.session_state.run:
+        # 
+        from streamlit_autorefresh import st_autorefresh
+        st_autorefresh(interval=600, key="loop")
+        if not st.session_state.steps:
+            st.session_state.steps = stepper.yield_steps()
+        if st.session_state.steps is not None:
             with placeholder:
-                build_visualization(CSP, current_filled)
-        else:
-            with placeholder:
-                full_result = backtracking_search(CSP)
-                build_visualization(CSP, full_result)
+                build_visualization(CSP, st.session_state.steps.__next__()[0])
 
-    if full_solution:
+    if st.button("Step"):
+        if not st.session_state.steps:
+            st.session_state.steps = stepper.yield_steps()
+        if st.session_state.steps is not None:
+            build_visualization(CSP, st.session_state.steps.__next__()[0])
+
+    if st.button("Full Solution"):
         placeholder.empty()
         resultFull = backtracking_search(CSP)
         with placeholder:
             build_visualization(CSP, resultFull)
 
-    elif reset_clicked:
+    elif st.button("Reset"):
         placeholder.empty()
         stepper = BacktrackStepper(CSP)
         st.session_state.stepper = stepper
@@ -78,7 +83,7 @@ def buildCSP():
     return astCSP
 
 def build_visualization(CSP, current_domain, filename="sudoku.html"):
-    print(current_domain)
+    # print(current_domain)
     network = Network(
         font_color = "white",
         height = "750px",
@@ -98,8 +103,10 @@ def build_visualization(CSP, current_domain, filename="sudoku.html"):
             domain_values = current_domain[var]
             if isinstance(domain_values, int):
                 value = domain_values
+        elif var in CSP.curr_domains and len(CSP.curr_domains[var]) == 1:
+            value = CSP.curr_domains[var][0]
 
-        if var in CSP.domains and len(CSP.domains[var]) == 1:
+        if var in CSP.curr_domains and len(CSP.curr_domains[var]) == 1:
             color = node_colors['given']
         elif value is not None:
             color = node_colors['filled']
