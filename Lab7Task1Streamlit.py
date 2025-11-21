@@ -12,7 +12,7 @@ from seatingCSP import seatingCSP
 def buildCSP():
     neighbors = "1: 2 6; 2: 3; 3: 4; 4: 5; 5: 6; 6: "
     variables = ['1', '2', '3', '4', '5', '6']
-    domain = ['A', 'B', 'C', 'D', 'E', 'F']
+    domain = ['A', 'B', 'C', 'D', 'E', '_']
     filled = {}
 
     def seating_constraint(X, x, Y, y):
@@ -46,7 +46,7 @@ def buildGraph(CSP, current_filled = None):
         'C' : 'green',
         'D' : 'yellow',
         'E' : 'orange',
-        'F' : 'purple',
+        '_' : 'purple',
         'unfilled': 'gray'
     }
 
