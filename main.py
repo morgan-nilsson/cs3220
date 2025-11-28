@@ -36,8 +36,8 @@ def main():
                 print("Please enter a valid integer.")
 
     strategies = {
+        "Human player": human_player,
         "Smart player": smart_player(minimax_search),
-        "Human player": human_player
     }
 
     players = list(strategies.keys())
